@@ -23,7 +23,7 @@ set(XATLAS_HDRS
 )
 
 # Build static library
-add_library(xatlas STATIC
+add_library(xatlas SHARED
   ${XATLAS_SRCS}
   ${XATLAS_HDRS}
 )
