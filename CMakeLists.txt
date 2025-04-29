@@ -1,37 +1,35 @@
-cmake_minimum_required(VERSION 3.10)
-project(xatlas LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.15)
+project(xatlas LANGUAGES CXX)
 
-# Force C++11
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# 1) Collect sources
+file(GLOB_RECURSE XATLAS_HEADERS
+     "${CMAKE_CURRENT_SOURCE_DIR}/source/xatlas/*.h")
+file(GLOB_RECURSE XATLAS_SOURCES
+     "${CMAKE_CURRENT_SOURCE_DIR}/source/xatlas/*.cpp")
 
-# Where to find headers
-include_directories(
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source/xatlas>
-  $<INSTALL_INTERFACE:include>
-)
-
-# Gather sources
-set(XATLAS_SRCS
-  source/xatlas/xatlas.cpp
-)
-
-set(XATLAS_HDRS
-  source/xatlas/xatlas.h
-  source/xatlas/xatlas_c.h
-)
-
-# Build static library
+# 2) Create a shared library
 add_library(xatlas SHARED
-  ${XATLAS_SRCS}
-  ${XATLAS_HDRS}
+    ${XATLAS_SOURCES}
+    ${XATLAS_HEADERS}
 )
 
-# Install rules (if you ever want to 'make install')
-install(TARGETS xatlas
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+# 3) Ensure PIC (for Linux/macOS) and automatic exports on Windows
+set_target_properties(xatlas PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
-install(FILES ${XATLAS_HDRS} DESTINATION include/xatlas)
+
+# 4) Force the base name “xatlas” on all platforms
+set_target_properties(xatlas PROPERTIES
+    OUTPUT_NAME "xatlas"
+    # On macOS you may want a versioned dylib:
+    # VERSION ${PROJECT_VERSION}
+    # SOVERSION ${PROJECT_VERSION_MAJOR}
+)
+
+# 5) Install rules (if you plan to `make install`)
+install(TARGETS xatlas
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+)
